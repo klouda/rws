@@ -38,7 +38,7 @@ public class NasaTest {
         try {
             System.out.println("Send GET request");
             String url =  obj.createURL(nasaURL, urlParameters);
-            obj.getResponse(url);
+            obj.getImgResponse(url);
         } finally {
             obj.close();
         }
@@ -46,20 +46,15 @@ public class NasaTest {
 
     @Test
     public void getVideos() throws Exception {
-        URL nasaURL = new URL("https://images-api.nasa.gov/search?");
-
+        URL nasaURL = new URL("https://images-api.nasa.gov/asset/Ep76_Apollo8");
         Map<String,Object> urlParameters = new LinkedHashMap<>();
-        urlParameters.put("keywords", "Mars");
-        urlParameters.put("media_type", "video");
-        urlParameters.put("year_start", "2018");
-        urlParameters.put("year_end", "2018");
-
+        
         NasaTest obj = new NasaTest();
 
         try {
             System.out.println("Send GET request");
             String url =  obj.createURL(nasaURL, urlParameters);
-            obj.getResponse(url);
+            obj.getAssetResponse(url);
         } finally {
             obj.close();
         }
@@ -81,7 +76,7 @@ public class NasaTest {
             return url;
     }
 
-    private void getResponse(String url) throws Exception {
+    private void getImgResponse(String url) throws Exception {
         HttpGet request = new HttpGet(url);
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             System.out.println(response.getStatusLine().toString());
@@ -101,6 +96,22 @@ public class NasaTest {
                 String imageURL = String.valueOf(obj.getJSONArray("links"));
                 System.out.println(imageURL);
             }
+        }
+    }
+    private void getAssetResponse(String url) throws Exception {
+        HttpGet request = new HttpGet(url);
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            System.out.println(response.getStatusLine().toString());
+
+            HttpEntity entity = response.getEntity();
+            Header headers = entity.getContentType();
+            System.out.println(headers);
+
+            String result = EntityUtils.toString(entity);
+            JSONObject jsonObject = new JSONObject(result);
+            System.out.println(jsonObject);
+            JSONArray jsonArray = jsonObject.getJSONObject("collection").getJSONArray("items");
+            System.out.println(jsonArray);
         }
     }
 }
