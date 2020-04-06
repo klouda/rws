@@ -2,6 +2,7 @@ import java.util.List;
 import java.lang.*;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,7 +14,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 public class PageTest {
     public static void main (String[] args)  {
-        System.setProperty("webdriver.chrome.driver", "C://chromedriver//chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "c:/drivers/chromedriver.exe");
         WebDriver driver = new ChromeDriver();
         driver.manage().window().maximize();
         openAndSearchTextOnWikiPage(driver);
@@ -21,37 +22,38 @@ public class PageTest {
 
     public static void openAndSearchTextOnWikiPage(WebDriver driver) {
         final String wikiPage = "https://en.wikipedia.org/wiki/Philosophical_theory";
-        final String word = "Philosophy";
-
+        final String philosophyPage = "https://en.wikipedia.org/wiki/Philosophy";
         openWikiPage(driver, wikiPage);
-        searchWordOnPage(driver, word);
-        closeWikiPage(driver);
+
+        int cnt = 0;
+        do {
+            List<WebElement> allLinks = driver.findElements(By.tagName("a"));
+            allLinks.get(1).click();
+            isLinkOnPage(driver);
+            System.out.println(cnt);
+        } while (isLinkOnPage(driver) != true);
+
+        closePage(driver);
     }
 
     public static void openWikiPage(WebDriver driver, String wikiPage) {
         driver.get(wikiPage);
     }
 
-    public static void searchWordOnPage(WebDriver driver, String word) {
-        int cnt = 0;
-        List<WebElement> links = driver.findElements(By.tagName("a"));
-        for (WebElement link : links)
-        {
-            if (link.getAttribute("title").contains(word))
-            {
-                link.click();
-                System.out.println("Link contains word " + word + ".");
-                System.out.println(cnt++);
-                break;
-            }
-            else {
-                System.out.println("Link does not contains word " + word + ".");
-                System.out.println(cnt++);
-            }
+    public static boolean isLinkOnPage(WebDriver driver) {
+        final String linkText = "Philosophy";
+        List<WebElement> link = driver.findElements(By.linkText(linkText));
+        if(link.size() != 0){
+            System.out.println("Element present");
+            return true;
+        }
+        else{
+            System.out.println("Element not present");
+            return false;
         }
     }
 
-    public static void closeWikiPage(WebDriver driver) {
-        driver.close();
+    public static void closePage(WebDriver driver) {
+        driver.quit();
     }
 }
